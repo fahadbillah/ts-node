@@ -4,6 +4,7 @@
   "description": "",
   "main": "src/app.js",
   "scripts": {
+    "ts": "tsc -w -p .",
     "start": "node ./dist/bin/www",
     "dev": "nodemon ./dist/bin/www",
     "test": "echo \"Error: no test specified\" && exit 1"

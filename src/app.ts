@@ -1,6 +1,8 @@
 import { Application, Request, Response, NextFunction } from 'express'
 import express = require('express')
-import bodyParser = require("body-parser");
+import bodyParser = require("body-parser")
+import home = require("./routes/home")
+// console.log(home);
 // import { bodyParser } from '@types/body-parser'
 
 // var response = express.request
@@ -31,11 +33,23 @@ var app: Application = express()
 
 app.use( bodyParser.urlencoded({extended: false}) )
 
-app.get('/', (req: Request, res: Response) => {
-  res.json({
-    message: 'Hello World!'
-  })
-})
+// class Home {
+  
+//   constructor() {
+//   }
+
+//   public index (req: Request, res: Response, next: NextFunction): void {
+//     res.json({
+//     message: 'Hello World!'
+//   })
+//   }
+// }
+
+// var home = new Home();
+app.get('/', home)
+// app.get('/', (req: Request, res: Response, next: NextFunction) => {
+//   home.index(req, res, next);
+// })
 
 app.get('/test', (req: Request, res: Response) => {
   res.json({
