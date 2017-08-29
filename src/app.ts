@@ -1,77 +1,43 @@
-import { Application, Request, Response, NextFunction } from 'express'
-import express = require('express')
-import bodyParser = require("body-parser")
-import home = require("./routes/home")
-// console.log(home);
-// import { bodyParser } from '@types/body-parser'
+import * as express from 'express'
+import * as bodyParser from 'body-parser'
+import * as compression from 'compression'
+import * as cors from 'cors'
+import * as logger from 'morgan'
+import * as mongoose from 'mongoose'
 
-// var response = express.request
-// class App {
-//   public application: Application;
-  
-//   constructor() {
-//     this.express = express()
-//     this.mountRoutes()
-//   }
+import UserRouter from './routes/user'
+// import UserRouter = require('./routes/user');
+// console.log(UserRouter)
 
-//   private mountRoutes (): void {
-//     const router = express.Router()
-//     router.get('/', (request, response) => {
-//       response.json({
-//         message: 'Hello World!'
-//       })
-//     })
-//     this.express.use('/', router)
-
-//     // this.express.use((req, res, next) => {
-
-//     // })
-//   }
-// }
-
-var app: Application = express()
-
-app.use( bodyParser.urlencoded({extended: false}) )
-
-// class Home {
-  
-//   constructor() {
-//   }
-
-//   public index (req: Request, res: Response, next: NextFunction): void {
-//     res.json({
-//     message: 'Hello World!'
-//   })
-//   }
-// }
-
-// var home = new Home();
-app.get('/', home)
-// app.get('/', (req: Request, res: Response, next: NextFunction) => {
-//   home.index(req, res, next);
-// })
-
-app.get('/test', (req: Request, res: Response) => {
-  res.json({
-    message: 'Hello World from test!'
-  })
-})
-
-app.use((req: Request, res: Response, next: NextFunction) => {
-  var err = new Error('Not Found');
-  next({
-    message: 'Not Found',
-    status: 404,
-    error: err
-  });
-})
+class Portal {
+  public app: express.Application
 
 
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  console.log(err);
-  res.json(err)
-})
+  constructor() {
+    this.app = express()
+    this.config();
+    this.routes();
+  }
 
+  public config(): void{
+    // db connection
+    const MONGO_URI = 'mongodb://localhost:27017/tstest';
+    mongoose.connect(MONGO_URI, (err) => {
+      if(err) console.log('connection error occurred!');
+      console.log('connection successful!');
+    });
 
+    // other config
+    this.app.use( bodyParser.urlencoded({extended: false}) ) 
+    this.app.use( bodyParser.json() ) 
+    this.app.use( logger('dev') );
+    this.app.use(compression())
+    this.app.use(cors())
+  }
 
-export default app;
+  public routes(): void{
+    this.app.use('/user', UserRouter);
+  }
+}
+
+export default new Portal().app;
