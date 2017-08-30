@@ -12,13 +12,18 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/bcryptjs": "^2.4.1",
+    "@types/uuid": "^3.4.1",
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.17.2",
     "compression": "^1.7.0",
     "cors": "^2.8.4",
     "express": "^4.15.4",
     "mongoose": "^4.11.9",
+    "mongoose-timestamp": "^0.6.0",
     "morgan": "^1.8.2",
-    "nodemon": "^1.11.0"
+    "nodemon": "^1.11.0",
+    "uuid": "^3.1.0"
   },
   "devDependencies": {
     "@types/body-parser": "^1.16.5",

@@ -5,9 +5,7 @@ import * as cors from 'cors'
 import * as logger from 'morgan'
 import * as mongoose from 'mongoose'
 
-import UserRouter from './routes/user'
-// import UserRouter = require('./routes/user');
-// console.log(UserRouter)
+import UserRouter from './routes/userRoute'
 
 class Portal {
   public app: express.Application
