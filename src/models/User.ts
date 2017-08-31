@@ -1,86 +1,91 @@
-import { Schema, model } from 'mongoose';
-import timestamps = require('mongoose-timestamp');
-import * as bcrypt from 'bcryptjs'
-import * as uuid from 'uuid'
+import * as bcrypt from "bcryptjs";
+import { model, Schema } from "mongoose";
+import timestamps = require("mongoose-timestamp");
+import * as uuid from "uuid";
 const SALT_WORK_FACTOR = 10;
 
-let UserSchema: Schema = new Schema({
-  userName: {
-    type: String,
+const UserSchema: Schema = new Schema({
+  accountStatus: {
+    default: "not_yet_activated",
+    enum: ["not_yet_activated", "active", "deactivated", "banned"],
     required: true,
-    unique: true
-  },
-  password: {
     type: String,
-    required: true
   },
-  firstName: {
-    type: String,
-    required: true
-  },
-  lastName: {
-    type: String,
-    required: true
+  address: {
+    current: {
+      type: String,
+    },
+    permanent: {
+      type: String,
+    },
   },
   contact: {
     email: {
-      type: String,
       required: true,
-      unique: true
+      type: String,
+      unique: true,
     },
     phone: {
-      type: String,
       required: true,
-      unique: true
+      type: String,
+      unique: true,
     },
-    address: {
-      permanent: {
-        type: String
-      },
-      current: {
-        type: String
-      }
-    }
   },
-  accountStatus: {
+  firstName: {
+    required: true,
     type: String,
-    enum: ['not_yet_activated', 'active', 'deactivated', 'banned'],
-    default: 'not_yet_activated',
-    required: true
   },
-  userType: {
+  lastName: {
+    required: true,
     type: String,
-    enum: ['user', 'admin', 'superAdmin'],
-    default: 'user',
-    required: true
-  },
-  token: {
-    type: String,
-    default: function() {
-        return uuid();
-    }
   },
   oldPasswords: [],
-  updateHistory: []
+  password: {
+    required: true,
+    type: String,
+  },
+  token: {
+    default: () => {
+        return uuid();
+    },
+    type: String,
+  },
+  updateHistory: [],
+  userName: {
+    required: true,
+    type: String,
+    unique: true,
+  },
+  userType: {
+    default: "user",
+    enum: ["user", "admin", "superAdmin"],
+    required: true,
+    type: String,
+  },
 });
 
-// UserSchema.path('contact.email').index({ unique: true });
-// UserSchema.path('phone.email').index({ unique: true });
-UserSchema.index({ userName: 1}, { unique: true })
-
+// UserSchema.path("contact.email").index({ unique: true });
+// UserSchema.path("phone.email").index({ unique: true });
+UserSchema.index({ userName: 1}, { unique: true });
 
 UserSchema.plugin(timestamps);
 
-UserSchema.pre('save', function(next) {
-  var user = this;
-  if (!user.isModified('password')) return next();
+UserSchema.pre("save", function(next) {
+  const user = this;
+  if (!user.isModified("password")) {
+    return next();
+  }
   // generate a salt
-  bcrypt.genSalt(SALT_WORK_FACTOR, function(err, salt) {
-    if (err) return next(err);
+  bcrypt.genSalt(SALT_WORK_FACTOR, (error, salt) => {
+    if (error) {
+      return next(error);
+    }
 
     // hash the password using our new salt
-    bcrypt.hash(user.password, salt, function(err, hash) {
-        if (err) return next(err);
+    bcrypt.hash(user.password, salt, (err, hash) => {
+        if (err) {
+          return next(err);
+        }
 
         // override the cleartext password with the hashed one
         user.password = hash;
@@ -89,4 +94,4 @@ UserSchema.pre('save', function(next) {
   });
 });
 
-export default model('User', UserSchema)
+export default model("User", UserSchema);
