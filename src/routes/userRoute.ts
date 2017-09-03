@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response, Router } from "express";
 import * as mongoose from "mongoose";
+import UserService from "../middlewares/userService";
 import User from "../models/User";
 
 class UserRouter {
@@ -10,60 +11,51 @@ class UserRouter {
   }
 
   public getUser(req: Request, res: Response, next: NextFunction): void {
-    User
-    .aggregate([
-      {
-        $match: {$and: [{ _id: mongoose.Types.ObjectId(req.params.id) }, { accountStatus: "deactivated" }]},
-        // count: {$sum: 1},
-      },
-      {$group: {_id: {
-        accountStatus: "$accountStatus",
-        userName: "$userName",
-      }, count: {$sum: 1}}},
-    ])
-    .exec((err, singleUser) => {
-      if (err) {
-        return next(err);
-      }
-      if (singleUser.length > 0) {
-        res.json({
-          data: singleUser,
-          message: "User found!",
-          success: true,
-        });
-      } else {
-        res.json({
-          message: "No user found with this id",
-          success: false,
-        });
-      }
+    const singleUser: any = UserService.readSingleUser({_id: req.params.id});
+    singleUser.then((user: any) => {
+      res.json({
+        data: user,
+        success: true,
+      });
     });
+    // test
   }
 
   public getUsers(req: Request, res: Response, next: NextFunction): void {
-    User
-    .find({
-      accountStatus: "not_yet_active",
-    })
-    .exec((err, userList) => {
-      if (err) {
-        return next(err);
-      }
-      res.json(userList);
+    const userLst: any = UserService.readMultipleUser({});
+    userLst.then((users: any) => {
+      res.json({
+        data: users,
+        success: true,
+      });
     });
+    // User
+    // .find({
+    //   accountStatus: "not_yet_active",
+    // })
+    // .exec((err, userList) => {
+    //   if (err) {
+    //     return next(err);
+    //   }
+    //   res.json(userList);
+    // });
   }
 
   public setUser(req: Request, res: Response, next: NextFunction): void {
-    const user = new User(req.body);
-    user.save((err, createdUser) => {
-      if (err) {
-        return next(err);
-      }
-      res.send({
-        success: true,
-        userData: createdUser,
-      });
+    const createdUser = UserService.createUser(req.body);
+    res.json({
+      data: createdUser,
+      message: "New user created!",
+      success: true,
     });
+  }
+
+  public updateUser(req: Request, res: Response, next: NextFunction): void {
+    if (this.modifyUser(req.body.params.id, req.body)) {
+      res.json({success: true, message: "User updated!", data: req.body});
+    } else {
+      res.json({success: false, message: "User update failed!"});
+    }
   }
 
   public removeUser(req: Request, res: Response, next: NextFunction): void {
@@ -85,7 +77,12 @@ class UserRouter {
     this.router.get("/:id", this.getUser);
     this.router.get("/", this.getUsers);
     this.router.post("/", this.setUser);
+    this.router.put("/:id", this.updateUser);
     this.router.delete("/:id", this.removeUser);
+  }
+
+  protected modifyUser(userId: string, newData: object ): boolean {
+    return true;
   }
 }
 
