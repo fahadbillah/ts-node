@@ -4,7 +4,15 @@ import User from "../models/User";
 
 class UserService {
     private next: NextFunction;
-    private excludedProp: string = "-password -token -contact -oldPasswords -updateHistory -__v";
+    // private excludedProp: string = "-password -token -contact -oldPasswords -updateHistory -__v";
+    private excludedProp: object = {
+        __v: 0,
+        contact: 0,
+        oldPasswords: 0,
+        password: 0,
+        token: 0,
+        updateHistory: 0,
+    };
     // public constructor() {}
 
     public createUser(userData: object): any {
@@ -33,42 +41,33 @@ class UserService {
         .exec();
     }
 
-    public readMultipleUser(filter: object): any {
+    public readMultipleUser(filter: object, skip: number, limit: number ): any {
         return User
-        // .find(filter)
-        // .select(this.excludedProp)
         .aggregate([
             {
-                $match: { userType: "user" } ,
+                $match: filter,
+            },
+            {
+                $project: this.excludedProp,
             },
             {
                 $group: {
-                    _id: {
-                        accountStatus: "$accountStatus",
-                        userName: "$userName",
-                    },
-                },
-            },
-            { $limit : 1 },
-            {
-                $group: {
-                    _id: "counting",
-                    data: { $push: "$_id" },
+                    _id: null,
+                    data: { $push: "$$ROOT" },
                     totalResult: {
                         $sum: 1,
                     },
                 },
             },
-            // {
-            //     $group: {
-            //         _id: null,
-            //         data: "$counting.data",
-            //         limitedResult: {
-            //             $sum: 1,
-            //         },
-            //         totalResult: "$counting.totalResult",
-            //     },
-            // },
+            {
+                $project: {
+                    _id: false,
+                    data: {
+                        $slice: ["$data", skip, limit],
+                    },
+                    totalResult: "$totalResult",
+                },
+            },
         ])
         .exec();
     }

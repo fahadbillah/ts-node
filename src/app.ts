@@ -2,10 +2,12 @@ import * as bodyParser from "body-parser";
 import * as compression from "compression";
 import * as cors from "cors";
 import * as express from "express";
+import { NextFunction, Request, Response } from "express";
 import * as mongoose from "mongoose";
 import * as logger from "morgan";
 import * as path from "path";
 
+import Profiler from "./middlewares/profilerSystem";
 import UserRouter from "./routes/userRoute";
 
 class Portal {
@@ -35,6 +37,11 @@ class Portal {
     this.app.use( logger("dev") );
     this.app.use(compression());
     this.app.use(cors());
+    this.app.use((req: Request, res: Response, next: NextFunction) => {
+      // console.log("testing");
+      Profiler.startProfiling();
+      return next();
+    });
   }
 
   public routes(): void {

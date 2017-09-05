@@ -1,5 +1,7 @@
 import { NextFunction, Request, Response, Router } from "express";
 import * as mongoose from "mongoose";
+import * as url from "url";
+import Profiler from "../middlewares/profilerSystem";
 import UserService from "../middlewares/userService";
 import User from "../models/User";
 
@@ -22,23 +24,19 @@ class UserRouter {
   }
 
   public getUsers(req: Request, res: Response, next: NextFunction): void {
-    const userLst: any = UserService.readMultipleUser({});
+    const urlParts = url.parse(req.url, true);
+    const query = urlParts.query;
+    // console.log(query);
+    const userLst: any = UserService.readMultipleUser({
+        accountStatus: "deactivated",
+    } , 0, 1);
     userLst.then((users: any) => {
       res.json({
         data: users,
+        profiler: Profiler.endProfiling(),
         success: true,
       });
     });
-    // User
-    // .find({
-    //   accountStatus: "not_yet_active",
-    // })
-    // .exec((err, userList) => {
-    //   if (err) {
-    //     return next(err);
-    //   }
-    //   res.json(userList);
-    // });
   }
 
   public setUser(req: Request, res: Response, next: NextFunction): void {
@@ -67,7 +65,7 @@ class UserRouter {
       },
     }, { new: true }, (err, removedUser) => {
       if (err) {
-        return next(err);
+        return e(err);
       }
       res.json(removedUser);
     });
