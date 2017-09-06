@@ -28,7 +28,7 @@ class UserRouter {
     const query = urlParts.query;
     // console.log(query);
     const userLst: any = UserService.readMultipleUser({
-        accountStatus: "deactivated",
+        accountStatus: "not_yet_activated",
     } , 0, 1);
     userLst.then((users: any) => {
       res.json({

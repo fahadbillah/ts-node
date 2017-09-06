@@ -2,12 +2,13 @@ import * as bodyParser from "body-parser";
 import * as compression from "compression";
 import * as cors from "cors";
 import * as express from "express";
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Request, Response, ErrorRequestHandler } from "express";
 import * as mongoose from "mongoose";
 import * as logger from "morgan";
 import * as path from "path";
 
 import Profiler from "./middlewares/profilerSystem";
+import IError from "./interfaces/IError";
 import UserRouter from "./routes/userRoute";
 
 class Portal {
@@ -45,9 +46,38 @@ class Portal {
   }
 
   public routes(): void {
-    this.app.use("/user", UserRouter);
     this.app.use("/", (req, res) => {
       res.render("index");
+    });
+    this.app.use("/user", UserRouter);
+    // this.pageNotFound();
+    this.app.use((req: Request, res: Response, next: NextFunction) => {
+      console.log("testinggg");
+      let err: IError = {
+        type: new Error("Page not found"),
+        status: 404,
+        message: "Page not found!",
+      };
+      next(err);
+    });
+    this.errorHandler();
+  }
+
+  public pageNotFound (): void {
+    this.app.use((req: Request, res: Response, next: NextFunction) => {
+      console.log("testinggg");
+      let err: IError = {
+        type: new Error("Page not found"),
+        status: 404,
+        message: "Page not found!",
+      };
+      next(err);
+    });
+  }
+
+  public errorHandler (): void {
+    this.app.use((err: ErrorRequestHandler, req: Request, res: Response, next: NextFunction) => {
+      res.send(err);
     });
   }
 }
