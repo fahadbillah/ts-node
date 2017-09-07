@@ -2,13 +2,14 @@ import * as bodyParser from "body-parser";
 import * as compression from "compression";
 import * as cors from "cors";
 import * as express from "express";
-import { NextFunction, Request, Response, ErrorRequestHandler } from "express";
+import { ErrorRequestHandler, NextFunction, Request, Response } from "express";
 import * as mongoose from "mongoose";
 import * as logger from "morgan";
 import * as path from "path";
 
-import Profiler from "./middlewares/profilerSystem";
 import IError from "./interfaces/IError";
+import Profiler from "./middlewares/profilerSystem";
+import HomeRouter from "./routes/homeRoute";
 import UserRouter from "./routes/userRoute";
 
 class Portal {
@@ -17,6 +18,7 @@ class Portal {
   constructor() {
     this.app = express();
     this.config();
+    // this.errorHandler();
     this.routes();
   }
 
@@ -39,47 +41,32 @@ class Portal {
     this.app.use(compression());
     this.app.use(cors());
     this.app.use((req: Request, res: Response, next: NextFunction) => {
-      // console.log("testing");
       Profiler.startProfiling();
       return next();
     });
   }
 
   public routes(): void {
-    this.app.use("/", (req, res) => {
-      res.render("index");
-    });
+    this.app.use("/", HomeRouter);
     this.app.use("/user", UserRouter);
-    // this.pageNotFound();
-    this.app.use((req: Request, res: Response, next: NextFunction) => {
-      console.log("testinggg");
-      let err: IError = {
-        type: new Error("Page not found"),
-        status: 404,
-        message: "Page not found!",
-      };
-      next(err);
-    });
-    this.errorHandler();
-  }
 
-  public pageNotFound (): void {
+    // 404 catcher
     this.app.use((req: Request, res: Response, next: NextFunction) => {
-      console.log("testinggg");
-      let err: IError = {
-        type: new Error("Page not found"),
+      const err = new Error("Page not found");
+      const errData: IError = {
+        message: err.message,
+        stack: err.stack,
         status: 404,
-        message: "Page not found!",
       };
-      next(err);
+      next(errData);
+    });
+
+    // error catcher
+    this.app.use((err: IError, req: Request, res: Response, next: NextFunction) => {
+      res.status(err.status).json(err);
     });
   }
 
-  public errorHandler (): void {
-    this.app.use((err: ErrorRequestHandler, req: Request, res: Response, next: NextFunction) => {
-      res.send(err);
-    });
-  }
 }
 
 export default new Portal().app;

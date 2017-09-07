@@ -12,8 +12,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@types/bcryptjs": "^2.4.1",
-    "@types/uuid": "^3.4.1",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.17.2",
     "compression": "^1.7.0",
@@ -23,10 +21,12 @@
     "mongoose": "^4.11.9",
     "mongoose-timestamp": "^0.6.0",
     "morgan": "^1.8.2",
-    "nodemon": "^1.11.0",
     "uuid": "^3.1.0"
   },
   "devDependencies": {
+    "nodemon": "^1.11.0",
+    "@types/bcryptjs": "^2.4.1",
+    "@types/uuid": "^3.4.1",
     "@types/body-parser": "^1.16.5",
     "@types/compression": "0.0.34",
     "@types/cors": "^2.8.1",

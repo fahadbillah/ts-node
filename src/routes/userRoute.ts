@@ -65,7 +65,7 @@ class UserRouter {
       },
     }, { new: true }, (err, removedUser) => {
       if (err) {
-        return e(err);
+        return next(err);
       }
       res.json(removedUser);
     });
